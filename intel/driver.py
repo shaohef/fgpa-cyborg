@@ -19,7 +19,9 @@ Cyborg Intel FPGA driver implementation.
 
 # from cyborg.accelerator.drivers.fpga.base import FPGADriver
 from fpga.base import FPGADriver
+import sysinfo
 from sysinfo import fpga_tree
+import subprocess
 
 
 class IntelFPGADriver(FPGADriver):
@@ -30,12 +32,26 @@ class IntelFPGADriver(FPGADriver):
     """
     VENDOR = "intel"
 
-    def __init__(self, args):
+    def __init__(self, *args, **kwargs):
         pass
 
     def discover(self):
         return fpga_tree()
 
     def program(self, device_path, image):
-        raise NotImplementedError("The program function of Intel FPGA "
-                                  "dirver is not implemented.")
+        bdf = ""
+        path = sysinfo.find_pf_by_vf(device_path) if sysinfo.is_vf(
+            device_path) else device_path
+        if sysinfo.is_bdf(device_path):
+            bdf = sysinfo.get_pf_bdf(device_path)
+        else:
+            bdf = sysinfo.get_bdf_by_path(path)
+        bdfs = sysinfo.split_bdf(bdf)
+        cmd = ["sudo", "fpgaconf"]
+        for i in zip(["-b", "-d", "-f"], bdfs):
+            cmd.extend(i)
+        cmd.append(image)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        # FIXME Should log p.communicate(), p.stderr
+        p.wait()
+        return p.returncode

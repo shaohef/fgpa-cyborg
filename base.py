@@ -26,14 +26,13 @@ class FPGADriver(object):
     """
 
     @classmethod
-    def create(cls, args):
+    def create(cls, vendor, *args, **kwags):
         for sclass in cls.__subclasses__():
-            if args['vendor'] == sclass.VENDOR:
-                return sclass(args)
-        raise LookupError("Not find the FPGA driver for vendor %s"
-                          % args.get('vendor'))
+            if vendor == sclass.VENDOR:
+                return sclass(*args, **kwargs)
+        raise LookupError("Not find the FPGA driver for vendor %s" % vendor)
 
-    def __init__(self, args):
+    def __init__(self, *args, **kwargs):
         pass
 
     def discover(self):

@@ -19,14 +19,18 @@ Cyborg Intel FPGA driver implementation.
 
 # from cyborg.accelerator.drivers.fpga.base import FPGADriver
 
-import os
 import glob
+import os
+import re
 
 
 SYS_FPGA = "/sys/class/fpga"
 DEVICE = "device"
 PF = "physfn"
 VF = "virtfn*"
+BDF_PATTERN = re.compile(
+    "^[a-fA-F\d]{4}:[a-fA-F\d]{2}:[a-fA-F\d]{2}\.[a-fA-F\d]$")
+
 
 DEVICE_FILE_MAP = {"vendor": "vendor_id",
                    "device": "product_id",
@@ -57,6 +61,13 @@ def target_symbolic_map():
     return maps
 
 
+def bdf_path_map():
+    maps = {}
+    for f in glob.glob(os.path.join(SYS_FPGA, "*/device")):
+        maps[os.path.basename(os.path.realpath(f))] = os.path.dirname(f)
+    return maps
+
+
 def all_vfs_in_pf_fpgas(pf_path):
     maps = target_symbolic_map()
     vfs = glob.glob(os.path.join(pf_path, "device/virtfn*"))
@@ -68,8 +79,39 @@ def all_pf_fpgas():
             glob.glob(os.path.join(SYS_FPGA, "*/device/sriov_totalvfs"))]
 
 
+def is_vf(path):
+    return True if glob.glob(os.path.join(path, "device/physfn")) else False
+
+
+def find_pf_by_vf(path):
+    maps = target_symbolic_map()
+    p = os.path.realpath(os.path.join(path, "device/physfn"))
+    return maps[p]
+
+
+def is_bdf(bdf):
+    return True if BDF_PATTERN.match(bdf) else False
+
+
+def get_bdf_by_path(path):
+    return os.path.basename(os.readlink(os.path.join(path, "device")))
+
+
+def split_bdf(bdf):
+    return ["0x"+v for v in  bdf.replace(".", ":").rsplit(":")[1:]]
+
+
+def get_pf_bdf(bdf):
+    path = bdf_path_map().get(bdf)
+    if path:
+        path = find_pf_by_vf(path) if is_vf(path) else path
+        return get_bdf_by_path(path)
+    return bdf
+
+
 def fpga_device(path):
     infos = {}
+
     def read_line(filename):
         with open(filename) as f:
             return f.readline().strip()
