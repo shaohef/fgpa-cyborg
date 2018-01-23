@@ -64,7 +64,8 @@ def all_vfs_in_pf_fpgas(pf_path):
 
 
 def all_pf_fpgas():
-    return list(set(all_fpgas()) - set(all_vf_fpgas()))
+    return [dev.rsplit("/", 2)[0] for dev in
+            glob.glob(os.path.join(SYS_FPGA, "*/device/sriov_totalvfs"))]
 
 
 def fpga_device(path):
