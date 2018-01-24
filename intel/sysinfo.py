@@ -98,7 +98,7 @@ def get_bdf_by_path(path):
 
 
 def split_bdf(bdf):
-    return ["0x"+v for v in  bdf.replace(".", ":").rsplit(":")[1:]]
+    return ["0x" + v for v in bdf.replace(".", ":").rsplit(":")[1:]]
 
 
 def get_pf_bdf(bdf):
@@ -124,7 +124,7 @@ def fpga_device(path):
                 if key in DEVICE_FILE_HANDLER and callable(
                         DEVICE_FILE_HANDLER(key)):
                     infos[key] = DEVICE_FILE_HANDLER(key)(
-                       os.path.join(dirpath, filename))
+                        os.path.join(dirpath, filename))
                 else:
                     infos[key] = read_line(os.path.join(dirpath, filename))
     return infos
