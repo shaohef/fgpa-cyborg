@@ -18,6 +18,12 @@ Cyborg FPGA driver implementation.
 """
 
 
+import util
+
+
+VENDOR_MAPS = {"0x8086": "intel"}
+
+
 class FPGADriver(object):
     """Base class for FPGA drivers.
 
@@ -28,6 +34,7 @@ class FPGADriver(object):
     @classmethod
     def create(cls, vendor, *args, **kwags):
         for sclass in cls.__subclasses__():
+            vendor = VENDOR_MAPS.get(vendor, vendor)
             if vendor == sclass.VENDOR:
                 return sclass(*args, **kwargs)
         raise LookupError("Not find the FPGA driver for vendor %s" % vendor)
@@ -40,3 +47,7 @@ class FPGADriver(object):
 
     def program(self, device_path, image):
         raise NotImplementedError()
+
+    @classmethod
+    def discover_vendors(cls):
+        return util.discover_vendors()
