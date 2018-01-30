@@ -1,0 +1,2 @@
+DRIVER=tpm_tis
+MODALIAS=acpi:MSFT0101:

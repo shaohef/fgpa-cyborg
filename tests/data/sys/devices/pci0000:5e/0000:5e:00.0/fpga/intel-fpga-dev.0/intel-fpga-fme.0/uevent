@@ -1,0 +1,5 @@
+MAJOR=244
+MINOR=0
+DEVNAME=intel-fpga-fme.0
+DRIVER=intel-fpga-fme
+MODALIAS=platform:intel-fpga-fme

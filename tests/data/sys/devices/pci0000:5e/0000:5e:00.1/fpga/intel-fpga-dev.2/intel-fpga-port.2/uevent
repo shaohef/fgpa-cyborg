@@ -1,0 +1,5 @@
+MAJOR=243
+MINOR=2
+DEVNAME=intel-fpga-port.2
+DRIVER=intel-fpga-port
+MODALIAS=platform:intel-fpga-port
