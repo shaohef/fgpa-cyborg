@@ -32,7 +32,7 @@ class FPGADriver(object):
     """
 
     @classmethod
-    def create(cls, vendor, *args, **kwags):
+    def create(cls, vendor, *args, **kwargs):
         for sclass in cls.__subclasses__():
             vendor = VENDOR_MAPS.get(vendor, vendor)
             if vendor == sclass.VENDOR:
